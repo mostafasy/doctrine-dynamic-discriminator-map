@@ -59,16 +59,13 @@ class MetadataListener implements EventSubscriber
         if ($class === null) {
             $class = new \ReflectionClass($metadata->getName());
         }
-
-        $reader = new AnnotationReader();
-
         $discriminatorMap = [];
-        $discriminatorMapAnnotation = $reader->getClassAnnotation($class, DiscriminatorMap::class);
-
-        if (null !== $discriminatorMapAnnotation) {
-            $discriminatorMap = $discriminatorMapAnnotation->value;
-        }
-
+        $attributes = $class->getAttributes(DiscriminatorMap::class);
+        if (!empty($attributes)) {
+            /** @var DiscriminatorMap $attributeInstance */
+            $attributeInstance = $attributes[0]->newInstance();
+            $discriminatorMap = $attributeInstance->value;
+      }
         $discriminatorMap = array_merge($discriminatorMap, $entityMetadata->getDiscriminatorMap());
         $metadata->setDiscriminatorMap($discriminatorMap);
     }
