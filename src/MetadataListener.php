@@ -65,7 +65,7 @@ class MetadataListener implements EventSubscriber
             /** @var DiscriminatorMap $attributeInstance */
             $attributeInstance = $attributes[0]->newInstance();
             $discriminatorMap = $attributeInstance->value;
-      }
+        }
         $discriminatorMap = array_merge($discriminatorMap, $entityMetadata->getDiscriminatorMap());
         $metadata->setDiscriminatorMap($discriminatorMap);
     }
