@@ -10,7 +10,7 @@ use Facile\DoctrineDDM\Configuration\Metadata;
 
 class ConfigProvider
 {
-    public function __invoke()
+    public function __invoke(): array
     {
         return [
             'dependencies' => $this->getDependencyConfig(),
@@ -18,9 +18,7 @@ class ConfigProvider
     }
 
     /**
-     * Return default service mappings for zend-cache.
-     *
-     * @return array
+     * Return default service mappings for Laminas/Mezzio DI container.
      */
     public function getDependencyConfig(): array
     {

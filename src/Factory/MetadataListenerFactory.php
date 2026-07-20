@@ -17,10 +17,7 @@ class MetadataListenerFactory
     /**
      * Create service.
      *
-     * @param ContainerInterface $container
-     * @return MetadataListener
-     * @throws ContainerExceptionInterface If any other error occurs.
-     *
+     * @throws ContainerExceptionInterface if any other error occurs
      */
     public function __invoke(ContainerInterface $container): MetadataListener
     {

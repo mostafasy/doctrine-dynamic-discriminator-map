@@ -12,14 +12,10 @@ use Psr\Container\ContainerInterface;
 class MetadataConfigFactory
 {
     /**
-     * @param ContainerInterface $container
-     *
-     * @throws ContainerExceptionInterface If any other error occurs.
+     * @throws ContainerExceptionInterface if any other error occurs
      * @throws InvalidArgumentException
-     *
-     * @return Configuration\Metadata
      */
-    public function __invoke(ContainerInterface $container)
+    public function __invoke(ContainerInterface $container): Configuration\Metadata
     {
         $config = $container->get('config');
 
@@ -27,11 +23,7 @@ class MetadataConfigFactory
     }
 
     /**
-     * @param array $configuration
-     *
      * @throws InvalidArgumentException
-     *
-     * @return Configuration\Metadata
      */
     public function createMetadata(array $configuration): Configuration\Metadata
     {
@@ -46,12 +38,6 @@ class MetadataConfigFactory
         return $metadata;
     }
 
-    /**
-     * @param string $entity
-     * @param array  $configuration
-     *
-     * @return Configuration\EntityMetadata
-     */
     protected function createEntityMetadata(string $entity, array $configuration): Configuration\EntityMetadata
     {
         return new Configuration\EntityMetadata($entity, $configuration['discriminator_map'] ?? []);
