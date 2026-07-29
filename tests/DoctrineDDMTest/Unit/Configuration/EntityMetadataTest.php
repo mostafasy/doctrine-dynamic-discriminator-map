@@ -5,41 +5,41 @@ declare(strict_types=1);
 namespace Facile\DoctrineDDMTest\Unit\Configuration;
 
 use Facile\DoctrineDDM\Configuration\EntityMetadata;
-use Facile\DoctrineDDMTest\Framework\TestCase;
+use PHPUnit\Framework\TestCase;
 
 class EntityMetadataTest extends TestCase
 {
-    public function testConstructor()
+    public function testConstructorSetsValues(): void
     {
-        $entityMetadata = new EntityMetadata('foo', ['foo' => 'bar']);
+        $map = ['employee' => 'App\\Entity\\Employee'];
+        $metadata = new EntityMetadata('App\\Entity\\Person', $map);
 
-        $this->assertEquals('foo', $entityMetadata->getEntityClass());
-        $this->assertEquals(['foo' => 'bar'], $entityMetadata->getDiscriminatorMap());
+        self::assertSame('App\\Entity\\Person', $metadata->getEntityClass());
+        self::assertSame($map, $metadata->getDiscriminatorMap());
     }
 
-    public function testConstructorWithOneArgument()
+    public function testConstructorWithEmptyDiscriminatorMap(): void
     {
-        $entityMetadata = new EntityMetadata('foo');
+        $metadata = new EntityMetadata('App\\Entity\\Person');
 
-        $this->assertEquals('foo', $entityMetadata->getEntityClass());
-        $this->assertEquals([], $entityMetadata->getDiscriminatorMap());
+        self::assertSame('App\\Entity\\Person', $metadata->getEntityClass());
+        self::assertSame([], $metadata->getDiscriminatorMap());
     }
 
-    public function testSetEntityClass()
+    public function testSetEntityClass(): void
     {
-        $entityMetadata = new EntityMetadata('foo');
+        $metadata = new EntityMetadata('App\\Entity\\Person');
+        $metadata->setEntityClass('App\\Entity\\User');
 
-        $entityMetadata->setEntityClass('bar');
-
-        $this->assertEquals('bar', $entityMetadata->getEntityClass());
+        self::assertSame('App\\Entity\\User', $metadata->getEntityClass());
     }
 
-    public function testSetDiscriminatorMap()
+    public function testSetDiscriminatorMap(): void
     {
-        $entityMetadata = new EntityMetadata('foo');
+        $metadata = new EntityMetadata('App\\Entity\\Person');
+        $newMap = ['admin' => 'App\\Entity\\Admin'];
+        $metadata->setDiscriminatorMap($newMap);
 
-        $entityMetadata->setDiscriminatorMap(['foo' => 'bar']);
-
-        $this->assertEquals(['foo' => 'bar'], $entityMetadata->getDiscriminatorMap());
+        self::assertSame($newMap, $metadata->getDiscriminatorMap());
     }
 }

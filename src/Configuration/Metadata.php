@@ -12,12 +12,12 @@ use Facile\DoctrineDDM\Exception;
 class Metadata
 {
     /**
-     * @var EntityMetadata[]
+     * @var array<string, EntityMetadata>
      */
-    protected $entityMetadatas = [];
+    protected array $entityMetadatas = [];
 
     /**
-     * @return EntityMetadata[]
+     * @return array<string, EntityMetadata>
      */
     public function getEntityMetadatas(): array
     {
@@ -29,7 +29,7 @@ class Metadata
      *
      * @throws \Facile\DoctrineDDM\Exception\InvalidArgumentException
      */
-    public function setEntityMetadatas(array $entityMetadatas)
+    public function setEntityMetadatas(array $entityMetadatas): void
     {
         $this->entityMetadatas = [];
 
@@ -39,27 +39,20 @@ class Metadata
     }
 
     /**
-     * @param EntityMetadata $entityMetadata
-     *
      * @throws \Facile\DoctrineDDM\Exception\InvalidArgumentException
      */
-    public function addEntityMetadata(EntityMetadata $entityMetadata)
+    public function addEntityMetadata(EntityMetadata $entityMetadata): void
     {
         if (array_key_exists($entityMetadata->getEntityClass(), $this->entityMetadatas)) {
             throw new Exception\InvalidArgumentException(sprintf(
                 'Entity "%s" is already defined',
-                $entityMetadata->getEntityClass()
+                $entityMetadata->getEntityClass(),
             ));
         }
         $this->entityMetadatas[$entityMetadata->getEntityClass()] = $entityMetadata;
     }
 
-    /**
-     * @param string $entityClass
-     *
-     * @return EntityMetadata|null
-     */
-    public function getEntityMetadata(string $entityClass)
+    public function getEntityMetadata(string $entityClass): ?EntityMetadata
     {
         return $this->entityMetadatas[$entityClass] ?? null;
     }

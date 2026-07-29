@@ -7,9 +7,9 @@ namespace Facile\DoctrineDDM;
 class Module
 {
     /**
-     * @return array
+     * @return array<string, mixed>
      */
-    public function getConfig()
+    public function getConfig(): array
     {
         $provider = new ConfigProvider();
 

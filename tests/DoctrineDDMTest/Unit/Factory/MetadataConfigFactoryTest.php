@@ -7,93 +7,69 @@ namespace Facile\DoctrineDDMTest\Unit\Factory;
 use Facile\DoctrineDDM\Configuration\EntityMetadata;
 use Facile\DoctrineDDM\Configuration\Metadata;
 use Facile\DoctrineDDM\Factory\MetadataConfigFactory;
-use Facile\DoctrineDDMTest\Framework\TestCase;
+use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 
 class MetadataConfigFactoryTest extends TestCase
 {
-    public function testInvoke()
+    public function testCreateMetadataFromContainer(): void
     {
-        $config = [];
-        $container = $this->prophet->prophesize(ContainerInterface::class);
-        $container->get('config')->willReturn($config);
-
-        $factory = new MetadataConfigFactory();
-
-        $instance = $factory($container->reveal());
-
-        $this->assertInstanceOf(Metadata::class, $instance);
-        $this->assertCount(0, $instance->getEntityMetadatas());
-    }
-
-    public function testInvokeWithConfig()
-    {
-        $config = [
-            MetadataConfigFactory::class => [
-                'class1' => [
-                    'discriminator_map' => [
-                        'foo' => 'bar',
+        $container = $this->createMock(ContainerInterface::class);
+        $container->method('get')
+            ->with('config')
+            ->willReturn([
+                MetadataConfigFactory::class => [
+                    'App\\Entity\\Person' => [
+                        'discriminator_map' => [
+                            'employee' => 'App\\Entity\\Employee',
+                        ],
                     ],
                 ],
-            ],
-        ];
-        $container = $this->prophet->prophesize(ContainerInterface::class);
-        $container->get('config')->willReturn($config);
+            ]);
 
         $factory = new MetadataConfigFactory();
+        $metadata = $factory($container);
 
-        /** @var Metadata $instance */
-        $instance = $factory($container->reveal());
+        self::assertInstanceOf(Metadata::class, $metadata);
+        self::assertCount(1, $metadata->getEntityMetadatas());
 
-        $this->assertInstanceOf(Metadata::class, $instance);
-        $this->assertCount(1, $instance->getEntityMetadatas());
+        $entityMetadata = $metadata->getEntityMetadata('App\\Entity\\Person');
+        self::assertInstanceOf(EntityMetadata::class, $entityMetadata);
+        self::assertSame(['employee' => 'App\\Entity\\Employee'], $entityMetadata->getDiscriminatorMap());
     }
 
-    public function testCreateMetadata()
+    public function testCreateMetadataWithEmptyConfig(): void
     {
-        $config = [
-            'class1' => [
-                'discriminator_map' => [
-                    'foo1' => 'bar1',
-                    'foo2' => 'bar2',
-                ],
-            ],
-            'class2' => [
-                'discriminator_map' => [
-                    'foo3' => 'bar3',
-                ],
-            ],
-        ];
+        $container = $this->createMock(ContainerInterface::class);
+        $container->method('get')
+            ->with('config')
+            ->willReturn([]);
 
         $factory = new MetadataConfigFactory();
+        $metadata = $factory($container);
 
-        /** @var Metadata $instance */
-        $instance = $factory->createMetadata($config);
+        self::assertInstanceOf(Metadata::class, $metadata);
+        self::assertSame([], $metadata->getEntityMetadatas());
+    }
 
-        $this->assertInstanceOf(Metadata::class, $instance);
-        $this->assertCount(2, $instance->getEntityMetadatas());
-
-        $entityMetadata1 = $instance->getEntityMetadata('class1');
-        $entityMetadata2 = $instance->getEntityMetadata('class2');
-
-        $this->assertInstanceOf(EntityMetadata::class, $entityMetadata1);
-        $this->assertInstanceOf(EntityMetadata::class, $entityMetadata2);
-
-        $this->assertEquals('class1', $entityMetadata1->getEntityClass());
-        $this->assertEquals('class2', $entityMetadata2->getEntityClass());
-
-        $this->assertEquals(
-            [
-                'foo1' => 'bar1',
-                'foo2' => 'bar2',
+    public function testCreateMetadataDirectly(): void
+    {
+        $factory = new MetadataConfigFactory();
+        $metadata = $factory->createMetadata([
+            'App\\Entity\\Person' => [
+                'discriminator_map' => [
+                    'employee' => 'App\\Entity\\Employee',
+                    'manager' => 'App\\Entity\\Manager',
+                ],
             ],
-            $entityMetadata1->getDiscriminatorMap()
-        );
-        $this->assertEquals(
-            [
-                'foo3' => 'bar3',
-            ],
-            $entityMetadata2->getDiscriminatorMap()
-        );
+        ]);
+
+        self::assertCount(1, $metadata->getEntityMetadatas());
+
+        $entityMetadata = $metadata->getEntityMetadata('App\\Entity\\Person');
+        self::assertSame([
+            'employee' => 'App\\Entity\\Employee',
+            'manager' => 'App\\Entity\\Manager',
+        ], $entityMetadata->getDiscriminatorMap());
     }
 }

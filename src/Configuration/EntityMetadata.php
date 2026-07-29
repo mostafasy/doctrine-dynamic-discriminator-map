@@ -9,20 +9,15 @@ namespace Facile\DoctrineDDM\Configuration;
  */
 class EntityMetadata
 {
-    /**
-     * @var string
-     */
-    protected $entityClass;
-    /**
-     * @var array
-     */
-    protected $discriminatorMap = [];
+    protected string $entityClass;
 
     /**
-     * EntityMetadata constructor.
-     *
-     * @param string $entityClass
-     * @param array  $discriminatorMap
+     * @var array<string, class-string>
+     */
+    protected array $discriminatorMap = [];
+
+    /**
+     * @param array<string, class-string> $discriminatorMap
      */
     public function __construct(string $entityClass, array $discriminatorMap = [])
     {
@@ -30,24 +25,18 @@ class EntityMetadata
         $this->discriminatorMap = $discriminatorMap;
     }
 
-    /**
-     * @return string
-     */
     public function getEntityClass(): string
     {
         return $this->entityClass;
     }
 
-    /**
-     * @param string $entityClass
-     */
-    public function setEntityClass(string $entityClass)
+    public function setEntityClass(string $entityClass): void
     {
         $this->entityClass = $entityClass;
     }
 
     /**
-     * @return array
+     * @return array<string, class-string>
      */
     public function getDiscriminatorMap(): array
     {
@@ -55,9 +44,9 @@ class EntityMetadata
     }
 
     /**
-     * @param array $discriminatorMap
+     * @param array<string, class-string> $discriminatorMap
      */
-    public function setDiscriminatorMap(array $discriminatorMap)
+    public function setDiscriminatorMap(array $discriminatorMap): void
     {
         $this->discriminatorMap = $discriminatorMap;
     }

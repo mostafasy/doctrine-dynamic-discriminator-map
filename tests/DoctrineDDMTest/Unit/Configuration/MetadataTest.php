@@ -7,76 +7,71 @@ namespace Facile\DoctrineDDMTest\Unit\Configuration;
 use Facile\DoctrineDDM\Configuration\EntityMetadata;
 use Facile\DoctrineDDM\Configuration\Metadata;
 use Facile\DoctrineDDM\Exception\InvalidArgumentException;
-use Facile\DoctrineDDMTest\Framework\TestCase;
+use PHPUnit\Framework\TestCase;
 
 class MetadataTest extends TestCase
 {
-    public function testConstructor()
+    public function testGetEntityMetadatasReturnsEmptyArrayByDefault(): void
     {
-        $metadata = new Metadata();
+        $config = new Metadata();
 
-        $this->assertEquals([], $metadata->getEntityMetadatas());
-        $this->assertNull($metadata->getEntityMetadata('foo'));
+        self::assertSame([], $config->getEntityMetadatas());
     }
 
-    public function testSetEntities()
+    public function testAddEntityMetadata(): void
     {
-        $metadata = new Metadata();
+        $config = new Metadata();
+        $entityMetadata = new EntityMetadata('App\\Entity\\Person', ['employee' => 'App\\Entity\\Employee']);
 
-        $fooEntityMetadata = $this->prophet->prophesize(EntityMetadata::class);
-        $fooEntityMetadata->getEntityClass()->willReturn('foo');
+        $config->addEntityMetadata($entityMetadata);
 
-        $barEntityMetadata = $this->prophet->prophesize(EntityMetadata::class);
-        $barEntityMetadata->getEntityClass()->willReturn('bar');
-
-        $metadata->setEntityMetadatas([
-            $fooEntityMetadata->reveal(),
-            $barEntityMetadata->reveal(),
-        ]);
-
-        $expected = [
-            'foo' => $fooEntityMetadata->reveal(),
-            'bar' => $barEntityMetadata->reveal(),
-        ];
-
-        $this->assertEquals($expected, $metadata->getEntityMetadatas());
+        self::assertCount(1, $config->getEntityMetadatas());
+        self::assertSame($entityMetadata, $config->getEntityMetadata('App\\Entity\\Person'));
     }
 
-    public function testAddEntityMetadata()
+    public function testAddDuplicateEntityMetadataThrowsException(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Entity "foo" is already defined');
+        $this->expectExceptionMessage('Entity "App\\Entity\\Person" is already defined');
 
-        $metadata = new Metadata();
+        $config = new Metadata();
+        $entityMetadata = new EntityMetadata('App\\Entity\\Person');
 
-        $fooEntityMetadata1 = $this->prophet->prophesize(EntityMetadata::class);
-        $fooEntityMetadata1->getEntityClass()->willReturn('foo');
-
-        $fooEntityMetadata2 = $this->prophet->prophesize(EntityMetadata::class);
-        $fooEntityMetadata2->getEntityClass()->willReturn('foo');
-
-        $metadata->addEntityMetadata($fooEntityMetadata1->reveal());
-        $metadata->addEntityMetadata($fooEntityMetadata2->reveal());
+        $config->addEntityMetadata($entityMetadata);
+        $config->addEntityMetadata($entityMetadata);
     }
 
-    public function testGetEntityMetadata()
+    public function testSetEntityMetadatas(): void
     {
-        $metadata = new Metadata();
+        $config = new Metadata();
+        $entityMetadata1 = new EntityMetadata('App\\Entity\\Person');
+        $entityMetadata2 = new EntityMetadata('App\\Entity\\User');
 
-        $fooEntityMetadata = $this->prophet->prophesize(EntityMetadata::class);
-        $fooEntityMetadata->getEntityClass()->willReturn('foo');
+        $config->setEntityMetadatas([$entityMetadata1, $entityMetadata2]);
 
-        $metadata->setEntityMetadatas([
-            $fooEntityMetadata->reveal(),
-        ]);
-
-        $this->assertSame($fooEntityMetadata->reveal(), $metadata->getEntityMetadata('foo'));
+        self::assertCount(2, $config->getEntityMetadatas());
+        self::assertSame($entityMetadata1, $config->getEntityMetadata('App\\Entity\\Person'));
+        self::assertSame($entityMetadata2, $config->getEntityMetadata('App\\Entity\\User'));
     }
 
-    public function testGetEntityMetadataWithInvalidClass()
+    public function testGetEntityMetadataReturnsNullForUnknownEntity(): void
     {
-        $metadata = new Metadata();
+        $config = new Metadata();
 
-        $this->assertNull($metadata->getEntityMetadata('foo'));
+        self::assertNull($config->getEntityMetadata('App\\Entity\\Unknown'));
+    }
+
+    public function testSetEntityMetadatasResetsExistingData(): void
+    {
+        $config = new Metadata();
+        $oldMetadata = new EntityMetadata('App\\Entity\\Old');
+        $config->addEntityMetadata($oldMetadata);
+
+        $newMetadata = new EntityMetadata('App\\Entity\\New');
+        $config->setEntityMetadatas([$newMetadata]);
+
+        self::assertCount(1, $config->getEntityMetadatas());
+        self::assertNull($config->getEntityMetadata('App\\Entity\\Old'));
+        self::assertSame($newMetadata, $config->getEntityMetadata('App\\Entity\\New'));
     }
 }
